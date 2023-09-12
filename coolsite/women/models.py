@@ -8,6 +8,13 @@ class Women(models.Model):
         verbose_name='Заголовок'
     )
 
+    slug = models.SlugField(
+        max_length=32,
+        unique=True,
+        db_index=True,
+        verbose_name='URL'
+    )
+
     content = models.TextField(
         verbose_name='Текст'
     )
@@ -35,19 +42,18 @@ class Women(models.Model):
     cat = models.ForeignKey(
         'Category',
         on_delete=models.PROTECT,
-        null=True
     )
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('post', kwargs={'post_id': self.pk})
+        return reverse('post', kwargs={'post_slug': self.slug})
 
     class Meta:
         verbose_name = 'Женщины'
         verbose_name_plural = 'Женщины'
-        ordering = ['time_create', 'title']
+        ordering = ['-time_create', 'title']
 
 
 class Category(models.Model):
@@ -55,6 +61,13 @@ class Category(models.Model):
         max_length=32,
         db_index=True,
         verbose_name='Название'
+    )
+
+    slug = models.SlugField(
+        max_length=32,
+        unique=True,
+        db_index=True,
+        verbose_name='URL'
     )
 
     def __str__(self):
