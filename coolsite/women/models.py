@@ -44,6 +44,11 @@ class Women(models.Model):
     def get_absolute_url(self):
         return reverse('post', kwargs={'post_id': self.pk})
 
+    class Meta:
+        verbose_name = 'Женщины'
+        verbose_name_plural = 'Женщины'
+        ordering = ['time_create', 'title']
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -57,3 +62,8 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('category', kwargs={'cat_id': self.pk})
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ['id']
