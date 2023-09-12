@@ -1,27 +1,25 @@
 from django import forms
+from django.core.exceptions import ValidationError
+
 from .models import *
 
 
-class AddPostForm(forms.Form):
-    title = forms.CharField(
-        max_length=32,
-        label='Заголовок'
-    )
+class AddPostForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cat'].empty_label = 'Категория не выбрана'
 
-    slug = forms.SlugField(
-        max_length=32,
-        label='URL'
-    )
+    class Meta:
+        model = Women
+        fields = ['title', 'slug', 'content', 'photo', 'is_published', 'cat']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input'}),
+            'content': forms.Textarea(attrs={'cols': 60, 'rows': 10})
+        }
 
-    content = forms.CharField(
-        widget=forms.Textarea(attrs={'cols': 60, 'rows': 10}),
-        label='Описание',
-    )
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if len(title) > 15:
+            raise ValidationError('Много')
 
-    is_published = forms.BooleanField(label='Публикация', required=False, initial=True)
-
-    cat = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
-        label='Категория',
-        empty_label='Категория не выбрана'
-    )
+        return title
