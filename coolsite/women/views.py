@@ -11,6 +11,7 @@ from .utils import *
 
 
 class WomenHome(DataMixin, ListView):
+    paginate_by = 3
     model = Women
     template_name = 'women/index.html'
     context_object_name = 'posts'
@@ -35,7 +36,8 @@ class WomenHome(DataMixin, ListView):
 #     return render(request, 'women/index.html', context=context)
 
 def about(request):
-    return render(request, 'women/about.html', {'title': 'Описание'})
+    cats = Category.objects.all()
+    return render(request, 'women/about.html', {'cats': cats, 'menu': menu, 'title': 'Описание'})
 
 
 # def addpage(request):
