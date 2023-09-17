@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import *
@@ -22,34 +22,14 @@ class WomenHome(DataMixin, ListView):
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
-        return Women.objects.filter(is_published=True)
+        return Women.objects.filter(is_published=True).select_related('cat')
 
-
-# def index(request):
-#     posts = Women.objects.all()
-#     context = {
-#         'posts': posts,
-#         'menu': menu,
-#         'title': 'Главная',
-#         'cat_selected': 0,
-#     }
-#     return render(request, 'women/index.html', context=context)
 
 def about(request):
     cats = Category.objects.all()
     return render(request, 'women/about.html', {'cats': cats, 'menu': menu, 'title': 'Описание'})
 
 
-# def addpage(request):
-#     if request.method == 'POST':
-#         form = AddPostForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('home')
-#
-#     else:
-#         form = AddPostForm()
-#     return render(request, 'women/addpage.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
 class AddPost(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'women/addpage.html'
@@ -63,25 +43,19 @@ class AddPost(LoginRequiredMixin, DataMixin, CreateView):
         return dict(list(context.items()) + list(c_def.items()))
 
 
-def contact(request):
-    return HttpResponse('contact')
+class ContactFormView(DataMixin, FormView):
+    form_class = ContactForm
+    template_name = 'women/contact.html'
+    success_url = reverse_lazy('home')
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Обратная связь')
+        return dict(list(context.items()) + list(c_def.items()))
 
-# def login(request):
-#     return HttpResponse('login')
-
-
-# def show_post(request, post_slug):
-#     post = get_object_or_404(Women, slug=post_slug)
-#
-#     context = {
-#         'post': post,
-#         'title': post.title,
-#         'menu': menu,
-#         'cat_selected': post.cat_id
-#     }
-#
-#     return render(request, 'women/post.html', context=context)
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return redirect('home')
 
 
 class ShowPost(DataMixin, DetailView):
@@ -109,7 +83,7 @@ class WomenCategory(DataMixin, ListView):
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
-        return Women.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
+        return Women.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True).select_related('cat')
 
 
 # def show_category(request, cat_id):
